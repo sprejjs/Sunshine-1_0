@@ -29,10 +29,10 @@ import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Created by vspreys on 7/22/14.
+ * Created by Vlad Spreys on 7/22/14 as part of the UDACity course.
  */
 public class ForecastFragment extends Fragment{
-
+    private ArrayAdapter<String> forecastArrayAdapter;
 
     public ForecastFragment() {
     }
@@ -56,7 +56,7 @@ public class ForecastFragment extends Fragment{
         weekForecast.add("Fri - Foggy - 70/46");
         weekForecast.add("Sat - Sunny - 76/68");
 
-        ArrayAdapter<String> arrayAdapter =
+        forecastArrayAdapter =
                 new ArrayAdapter<String>(
                         getActivity(),
                         R.layout.list_item_forecast,
@@ -64,7 +64,7 @@ public class ForecastFragment extends Fragment{
                         weekForecast);
 
         ListView listView = (ListView)rootView.findViewById(R.id.listview_forecast);
-        listView.setAdapter(arrayAdapter);
+        listView.setAdapter(forecastArrayAdapter);
 
         return rootView;
     }
@@ -141,11 +141,12 @@ public class ForecastFragment extends Fragment{
 
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
+                StringBuilder buffer = new StringBuilder();
                 if (inputStream == null) {
                     // Nothing to do.
                     forecastJsonStr = null;
                 }
+                assert inputStream != null;
                 reader = new BufferedReader(new InputStreamReader(inputStream));
 
                 String line;
@@ -153,7 +154,7 @@ public class ForecastFragment extends Fragment{
                     // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
                     // But it does make debugging a *lot* easier if you print out the completed
                     // buffer for debugging.
-                    buffer.append(line + "\n");
+                    buffer.append(line).append("\n");
                 }
 
                 if (buffer.length() == 0) {
@@ -188,6 +189,16 @@ public class ForecastFragment extends Fragment{
                 return null;
             }
         }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if(result != null){
+                forecastArrayAdapter.clear();
+                for(String dayForecast : result) {
+                    forecastArrayAdapter.add(dayForecast);
+                }
+            }
+        }
     }
 
     /**
@@ -199,7 +210,7 @@ public class ForecastFragment extends Fragment{
         // it must be converted to milliseconds in order to be converted to valid date.
         Date date = new Date(time * 1000);
         SimpleDateFormat format = new SimpleDateFormat("E, MMM d");
-        return format.format(date).toString();
+        return format.format(date);
     }
 
     /**
@@ -210,8 +221,7 @@ public class ForecastFragment extends Fragment{
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
-        String highLowStr = roundedHigh + "/" + roundedLow;
-        return highLowStr;
+        return roundedHigh + "/" + roundedLow;
     }
 
     /**
