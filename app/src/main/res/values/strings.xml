@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sunshine</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="fragment_main_lblToday">Today, June 24</string>
+    <string name="fragment_main_lblDegrees">21°</string>
+    <string name="fragment_mail_lblDegrees2">8°</string>
+    <string name="fragment_main_lblWetherIndicator">Cloudy</string>
+    <string name="forecastfragment_lblRefresh" translatable="false">Refresh</string>
+</resources>
