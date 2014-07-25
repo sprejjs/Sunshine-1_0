@@ -1,9 +1,12 @@
 package com.spreys.sunshine.app;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -44,17 +48,17 @@ public class ForecastFragment extends Fragment{
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         ArrayList<String> weekForecast = new ArrayList<String>();
-        weekForecast.add("Today - Sunny - 88/63");
-        weekForecast.add("Tomorrow - Sunny - 70/46");
-        weekForecast.add("Weds - Cloudy - 72/63");
-        weekForecast.add("Thurs - Rainy - 64/51");
-        weekForecast.add("Fri - Foggy - 70/46");
-        weekForecast.add("Sat - Sunny - 76/68");
 
         forecastArrayAdapter =
                 new ArrayAdapter<String>(
@@ -65,7 +69,15 @@ public class ForecastFragment extends Fragment{
 
         ListView listView = (ListView)rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastArrayAdapter);
-
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String forecast = forecastArrayAdapter.getItem(position);
+                Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, forecast);
+                startActivity(detailActivityIntent);
+            }
+        });
         return rootView;
     }
 
@@ -76,14 +88,24 @@ public class ForecastFragment extends Fragment{
         inflater.inflate(R.menu.forecastfragment, menu);
     }
 
+    private void updateWeather(){
+        String zipCode;
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        zipCode = settings.getString(getString(R.string.pref_general_location_key), getString(R.string.pref_general_location_default));
+
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        weatherTask.execute(zipCode);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
 
         if(R.id.action_refresh == id){
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("90210");
+
+            updateWeather();
             return true;
         }
 
