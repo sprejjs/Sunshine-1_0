@@ -12,5 +12,8 @@
     <ListPreference
         android:title="Units"
         android:key="units"
+        android:entries="@array/units_keys"
+        android:entryValues="@array/units_values"
+        android:defaultValue="@string/pref_general_units_metric_value"
         />
 </PreferenceScreen>
