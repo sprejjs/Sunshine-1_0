@@ -34,7 +34,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.spreys.sunshine.app.MainActivity" />
         </activity>
-
+        
+        <provider
+            android:authorities="com.spreys.sunshine.app"
+            android:name=".data.WeatherProvider" />
     </application>
 
 </manifest>
