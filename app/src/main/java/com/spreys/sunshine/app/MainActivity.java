@@ -1,7 +1,11 @@
 package com.spreys.sunshine.app;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +41,17 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             Intent settingsIntent = new Intent(this, SettingsActivity.class);
             startActivity(settingsIntent);
+            return true;
+        }
+
+        if(R.id.action_show_location_on_map == id){
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            String zipCode = settings.getString(getString(R.string.pref_general_location_key), getString(R.string.pref_general_location_default));
+            intent.setData(Uri.parse("geo:0,0").buildUpon().appendQueryParameter("q", zipCode).build());
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

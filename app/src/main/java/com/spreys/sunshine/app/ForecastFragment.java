@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,12 +91,14 @@ public class ForecastFragment extends Fragment{
 
     private void updateWeather(){
         String zipCode;
+        String units;
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getActivity());
         zipCode = settings.getString(getString(R.string.pref_general_location_key), getString(R.string.pref_general_location_default));
+        units = settings.getString(getString(R.string.pref_general_units_key), getString(R.string.pref_general_units_imperial_key));
 
         FetchWeatherTask weatherTask = new FetchWeatherTask();
-        weatherTask.execute(zipCode);
+        weatherTask.execute(zipCode, units);
     }
 
     @Override
@@ -104,7 +107,6 @@ public class ForecastFragment extends Fragment{
         int id = item.getItemId();
 
         if(R.id.action_refresh == id){
-
             updateWeather();
             return true;
         }
@@ -118,7 +120,7 @@ public class ForecastFragment extends Fragment{
 
         protected String[] doInBackground(String... params){
 
-            if(0 == params.length){
+            if(params.length < 2){
                 return null;
             }
 
@@ -133,7 +135,7 @@ public class ForecastFragment extends Fragment{
             //Parameters values
             String PARAM_VALUE_Q = params[0];
             String PARAM_VALUE_MODE = "json";
-            String PARAM_VALUE_UNITS = "metric";
+            String PARAM_VALUE_UNITS = params[1];
             String PARAM_VALUE_CNT = "7";
 
             Uri builtUri = Uri.parse(BASE_URL).buildUpon()
