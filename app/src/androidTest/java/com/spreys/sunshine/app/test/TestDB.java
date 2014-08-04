@@ -1,8 +1,10 @@
 package com.spreys.sunshine.app.test;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -17,7 +19,6 @@ public class TestDB extends AndroidTestCase {
 
     public static final String LOG_TAG = TestDB.class.getSimpleName();
     public static String TEST_LOCATION = "99705";
-    public static String TEST_CITY_NAME = "North Pole";
     public static String TEST_DATE = "20141205";
 
     public void testCreateDb() throws Throwable {
@@ -26,6 +27,15 @@ public class TestDB extends AndroidTestCase {
                 this.mContext).getWritableDatabase();
         assertEquals(true, db.isOpen());
         db.close();
+    }
+
+    // The target api annotation is needed for the call to keySet -- we wouldn't want
+    // to use this in our app, but in a test it's fine to assume a higher target.
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    void addAllContentValues(ContentValues destination, ContentValues source) {
+        for (String key : source.keySet()) {
+            destination.put(key, source.getAsString(key));
+        }
     }
 
     public void testInsertReadDb() {
@@ -81,7 +91,7 @@ public class TestDB extends AndroidTestCase {
 
         // Add the location values in with the weather data so that we can make
         // sure that the join worked and we actually get all the values back
-        //addAllContentValues(weatherValues, testValues);
+        addAllContentValues(weatherValues, testValues);
 
         // Get the joined Weather and Location data
         weatherCursor = mContext.getContentResolver().query(
