@@ -42,13 +42,13 @@ public class WeatherProvider extends ContentProvider{
     }
 
     private static final String sLocationSettingAndDateSelection =
-            WeatherContract.LocationEntry.TABLE_NAME+
+            WeatherContract.LocationEntry.TABLE_NAME +
                     "." + WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ? AND " +
                     WeatherContract.WeatherEntry.COLUMN_DATETEXT + " = ? ";
 
     private Cursor getWeatherByLocationSettingAndDate(Uri uri, String[] projection, String sortOrder) {
         String locationSetting = WeatherContract.WeatherEntry.getLocationSettingFromUri(uri);
-        String startDate = WeatherContract.WeatherEntry.getStartDateFromUri(uri);
+        String startDate = WeatherContract.WeatherEntry.getDateFromUri(uri);
 
         return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,

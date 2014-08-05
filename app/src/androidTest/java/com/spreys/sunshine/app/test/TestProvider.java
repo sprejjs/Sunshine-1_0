@@ -141,6 +141,17 @@ public class TestProvider extends AndroidTestCase {
                 null  // sort order
         );
         TestDB.validateCursor(weatherCursor, weatherValues);
+
+        // Get the joined Weather and Location data with a start date
+        weatherCursor = mContext.getContentResolver().query(
+                WeatherEntry.buildWeatherLocationWithDate(
+                        TestDB.TEST_LOCATION, TestDB.TEST_DATE),
+                null, // leaving "columns" null just returns all the columns.
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null  // sort order
+        );
+        TestDB.validateCursor(weatherCursor, weatherValues);
     }
 
     static ContentValues createWeatherValues(long locationRowId) {

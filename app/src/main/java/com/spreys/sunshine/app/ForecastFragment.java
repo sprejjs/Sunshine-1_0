@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,10 +16,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import com.spreys.sunshine.app.data.WeatherContract;
@@ -33,7 +33,7 @@ import com.spreys.sunshine.app.data.WeatherContract.WeatherEntry;
  * Contact by: vlad@spreys.com
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
-    private ArrayAdapter<String> forecastArrayAdapter;
+    private SimpleCursorAdapter forecastArrayAdapter;
     private static final int FORECAST_LOADER = 0;
     private String mLocation;
 
@@ -73,37 +73,80 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        updateWeather();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        ArrayList<String> weekForecast = new ArrayList<String>();
-
-        forecastArrayAdapter =
-                new ArrayAdapter<String>(
-                        getActivity(),
-                        R.layout.list_item_forecast,
+        // The SimpleCursorAdapter will take data from the database through the
+        // Loader and use it to populate the ListView it's attached to.
+        forecastArrayAdapter = new SimpleCursorAdapter(
+                getActivity(),
+                R.layout.list_item_forecast,
+                null,
+                // the column names to use to fill the textviews
+                new String[]{WeatherContract.WeatherEntry.COLUMN_DATETEXT,
+                        WeatherContract.WeatherEntry.COLUMN_SHORT_DESC,
+                        WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+                        WeatherContract.WeatherEntry.COLUMN_MIN_TEMP
+                },
+                // the textviews to fill with the data pulled from the columns above
+                new int[]{R.id.list_item_date_textview,
                         R.id.list_item_forecast_textview,
-                        weekForecast);
+                        R.id.list_item_high_textview,
+                        R.id.list_item_low_textview
+                },
+                0
+        );
+
+        forecastArrayAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                boolean isMetric = Utility.isMetric(getActivity());
+                switch (columnIndex) {
+                    case COL_WEATHER_MAX_TEMP:
+                    case COL_WEATHER_MIN_TEMP: {
+                        // we have to do some formatting and possibly a conversion
+                        ((TextView) view).setText(Utility.formatTemperature(
+                                cursor.getDouble(columnIndex), isMetric));
+                        return true;
+                    }
+                    case COL_WEATHER_DATE: {
+                        String dateString = cursor.getString(columnIndex);
+                        TextView dateView = (TextView) view;
+                        dateView.setText(Utility.formatDate(dateString));
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         ListView listView = (ListView)rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastArrayAdapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String forecast = forecastArrayAdapter.getItem(position);
-                Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, forecast);
-                startActivity(detailActivityIntent);
+
+                SimpleCursorAdapter adapter = (SimpleCursorAdapter)parent.getAdapter();
+                Cursor cursor = adapter.getCursor();
+
+                if(null != cursor && cursor.moveToPosition(position)){
+                    Intent detailActivityIntent = new Intent(getActivity(), DetailActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT, cursor.getString(COL_WEATHER_DATE));
+                    startActivity(detailActivityIntent);
+                }
             }
         });
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mLocation != null && !mLocation.equals(Utility.getPreferredLocation(getActivity()))) {
+            getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+        }
     }
 
     @Override
@@ -113,19 +156,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         inflater.inflate(R.menu.forecastfragment, menu);
     }
 
-    private void updateWeather(){
-
-        FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity(), forecastArrayAdapter);
-        weatherTask.execute(Utility.getPreferredLocation(getActivity()));
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
 
         if(R.id.action_refresh == id){
-            updateWeather();
+            FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
+            weatherTask.execute(Utility.getPreferredLocation(getActivity()));
             return true;
         }
 
@@ -169,11 +207,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
+        forecastArrayAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        forecastArrayAdapter.swapCursor(null);
     }
 }

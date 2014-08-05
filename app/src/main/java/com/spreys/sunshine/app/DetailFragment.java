@@ -1,8 +1,13 @@
 package com.spreys.sunshine.app;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
@@ -12,12 +17,49 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
+import com.spreys.sunshine.app.data.WeatherContract;
+import com.spreys.sunshine.app.data.WeatherContract.LocationEntry;
+import com.spreys.sunshine.app.data.WeatherContract.WeatherEntry;
 /**
- * Created by vladspreys on 27/07/14.
+ * Created with Android Studio
+ * @author vspreys
+ * Date: 27/07/14.
+ * Project: Sunshine
+ * Contact by: vlad@spreys.com
  */
-public class DetailFragment extends Fragment{
-    private static String forecastData;
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+    private static String date;
+    private String forecastData;
+    private static final int FORECAST_LOADER = 0;
+    private ShareActionProvider mShareActionProvider;
+    private String mLocation;
+    private static final String LOCATION_KEY = "location";
+
+    // For the forecast view we're showing only a small subset of the stored data.
+    // Specify the columns we need.
+    private static final String[] FORECAST_COLUMNS = {
+            // In this case the id needs to be fully qualified with a table name, since
+            // the content provider joins the location & weather tables in the background
+            // (both have an _id column)
+            // On the one hand, that's annoying.  On the other, you can search the weather table
+            // using the location set by the user, which is only in the Location table.
+            // So the convenience is worth it.
+            WeatherEntry.TABLE_NAME + "." + WeatherContract.WeatherEntry._ID,
+            WeatherEntry.COLUMN_DATETEXT,
+            WeatherEntry.COLUMN_SHORT_DESC,
+            WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherEntry.COLUMN_MIN_TEMP,
+            LocationEntry.COLUMN_LOCATION_SETTING
+    };
+
+    // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
+    // must change.
+    public static final int COL_WEATHER_ID = 0;
+    public static final int COL_WEATHER_DATE = 1;
+    public static final int COL_WEATHER_DESC = 2;
+    public static final int COL_WEATHER_MAX_TEMP = 3;
+    public static final int COL_WEATHER_MIN_TEMP = 4;
+    public static final int COL_LOCATION_SETTING = 5;
 
     public DetailFragment(){
 
@@ -34,10 +76,10 @@ public class DetailFragment extends Fragment{
         inflater.inflate(R.menu.detail_fragment, menu);
 
         MenuItem shareItem = menu.findItem(R.id.action_share);
-        ShareActionProvider mShareActionProvider = (ShareActionProvider)
+        mShareActionProvider = (ShareActionProvider)
                 MenuItemCompat.getActionProvider(shareItem);
 
-        mShareActionProvider.setShareIntent(getDefaultShareIntent());
+        mShareActionProvider.setShareIntent(getShareIntent());
 
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -48,12 +90,18 @@ public class DetailFragment extends Fragment{
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         Intent detailActivityIntent = getActivity().getIntent();
-        forecastData = detailActivityIntent.getStringExtra(Intent.EXTRA_TEXT);
-        ((TextView)rootView.findViewById(R.id.detail_text)).setText(forecastData);
+        date = detailActivityIntent.getStringExtra(Intent.EXTRA_TEXT);
+
+        /*
+         * Initializes the CursorLoader. The URL_LOADER value is eventually passed
+         * to onCreateLoader().
+         */
+        getLoaderManager().initLoader(FORECAST_LOADER, null, this);
+
         return rootView;
     }
 
-    private Intent getDefaultShareIntent(){
+    private Intent getShareIntent(){
         String messageToSend = forecastData + " #SunishineApp";
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
@@ -61,5 +109,67 @@ public class DetailFragment extends Fragment{
         shareIntent.putExtra(Intent.EXTRA_TEXT, messageToSend);
 
         return shareIntent;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(LOCATION_KEY, mLocation);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        mLocation = Utility.getPreferredLocation(getActivity());
+        Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
+                mLocation, date);
+
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        return new CursorLoader(
+                getActivity(),
+                weatherForLocationUri,
+                FORECAST_COLUMNS,
+                null,
+                null,
+                null
+        );
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        if(cursor.moveToFirst()){
+            boolean isMetric = Utility.isMetric(getActivity());
+
+            String forecastDate = Utility.formatDate(cursor.getString(COL_WEATHER_DATE));
+            String forecastDesc = cursor.getString(COL_WEATHER_DESC);
+
+            String forecastMinTemp = Utility.formatTemperature(
+                    cursor.getDouble(COL_WEATHER_MIN_TEMP),
+                    isMetric
+            );
+
+            String forecastMaxTemp = Utility.formatTemperature(
+                    cursor.getDouble(COL_WEATHER_MAX_TEMP),
+                    isMetric
+            );
+
+            ((TextView)getActivity().findViewById(R.id.lblDate)).setText(forecastDate);
+            ((TextView)getActivity().findViewById(R.id.lblDesc)).setText(forecastDesc);
+            ((TextView)getActivity().findViewById(R.id.lblMin)).setText(forecastMinTemp);
+            ((TextView)getActivity().findViewById(R.id.lblMax)).setText(forecastMaxTemp);
+
+            forecastData = String.format(
+              "%s - %s - %s/%s", forecastDate, forecastDesc, forecastMinTemp, forecastMaxTemp
+            );
+
+            if(null != mShareActionProvider){
+                mShareActionProvider.setShareIntent(getShareIntent());
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
     }
 }
