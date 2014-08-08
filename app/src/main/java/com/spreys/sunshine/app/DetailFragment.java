@@ -20,6 +20,9 @@ import android.widget.TextView;
 import com.spreys.sunshine.app.data.WeatherContract;
 import com.spreys.sunshine.app.data.WeatherContract.LocationEntry;
 import com.spreys.sunshine.app.data.WeatherContract.WeatherEntry;
+
+import org.w3c.dom.Text;
+
 /**
  * Created with Android Studio
  * @author vspreys
@@ -49,6 +52,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             WeatherEntry.COLUMN_SHORT_DESC,
             WeatherEntry.COLUMN_MAX_TEMP,
             WeatherEntry.COLUMN_MIN_TEMP,
+            WeatherEntry.COLUMN_HUMIDITY,
+            WeatherEntry.COLUMN_WIND_SPEED,
+            WeatherEntry.COLUMN_PRESSURE,
+            WeatherEntry.COLUMN_DEGREES,
             LocationEntry.COLUMN_LOCATION_SETTING
     };
 
@@ -59,7 +66,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_WEATHER_DESC = 2;
     public static final int COL_WEATHER_MAX_TEMP = 3;
     public static final int COL_WEATHER_MIN_TEMP = 4;
-    public static final int COL_LOCATION_SETTING = 5;
+    public static final int COL_WEATHER_HUMIDITY = 5;
+    public static final int COL_WEATHER_WIND_SPEED = 6;
+    public static final int COL_WEATHER_PRESSURE = 7;
+    public static final int COL_DEGREES = 8;
+    public static final int COL_LOCATION_SETTING = 9;
 
     public DetailFragment(){
 
@@ -140,23 +151,52 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if(cursor.moveToFirst()){
             boolean isMetric = Utility.isMetric(getActivity());
 
-            String forecastDate = Utility.formatDate(cursor.getString(COL_WEATHER_DATE));
+            String forecastDay = Utility.getDayName(
+                    getActivity(),
+                    cursor.getString(COL_WEATHER_DATE)
+            );
+
+            String forecastDate = Utility.getFormattedMonthDay(
+                    getActivity(),
+                    cursor.getString(COL_WEATHER_DATE)
+            );
             String forecastDesc = cursor.getString(COL_WEATHER_DESC);
 
             String forecastMinTemp = Utility.formatTemperature(
+                    getActivity(),
                     cursor.getDouble(COL_WEATHER_MIN_TEMP),
                     isMetric
             );
 
             String forecastMaxTemp = Utility.formatTemperature(
+                    getActivity(),
                     cursor.getDouble(COL_WEATHER_MAX_TEMP),
                     isMetric
             );
 
+            String forecastHumidity = Utility.getFormattedHumidity(
+                    getActivity(),
+                    cursor.getFloat(COL_WEATHER_HUMIDITY)
+            );
+            String forecastWind = Utility.getFormattedWind(
+                    getActivity(),
+                    cursor.getFloat(COL_WEATHER_WIND_SPEED),
+                    cursor.getFloat(COL_DEGREES)
+            );
+
+            String forecastPressure = Utility.getFormattedPressure(
+                    getActivity(),
+                    cursor.getFloat(COL_WEATHER_PRESSURE)
+            );
+
+            ((TextView)getActivity().findViewById(R.id.lblDay)).setText(forecastDay);
             ((TextView)getActivity().findViewById(R.id.lblDate)).setText(forecastDate);
             ((TextView)getActivity().findViewById(R.id.lblDesc)).setText(forecastDesc);
-            ((TextView)getActivity().findViewById(R.id.lblMin)).setText(forecastMinTemp);
-            ((TextView)getActivity().findViewById(R.id.lblMax)).setText(forecastMaxTemp);
+            ((TextView)getActivity().findViewById(R.id.lblHighTemp)).setText(forecastMinTemp);
+            ((TextView)getActivity().findViewById(R.id.lblLowTemp)).setText(forecastMaxTemp);
+            ((TextView)getActivity().findViewById(R.id.lblHumidity)).setText(forecastHumidity);
+            ((TextView)getActivity().findViewById(R.id.lblWind)).setText(forecastWind);
+            ((TextView)getActivity().findViewById(R.id.lblPressure)).setText(forecastPressure);
 
             forecastData = String.format(
               "%s - %s - %s/%s", forecastDate, forecastDesc, forecastMinTemp, forecastMaxTemp
