@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import com.spreys.sunshine.app.data.WeatherContract;
 import com.spreys.sunshine.app.data.WeatherContract.LocationEntry;
@@ -56,6 +57,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             WeatherEntry.COLUMN_WIND_SPEED,
             WeatherEntry.COLUMN_PRESSURE,
             WeatherEntry.COLUMN_DEGREES,
+            WeatherEntry.COLUMN_WEATHER_ID,
             LocationEntry.COLUMN_LOCATION_SETTING
     };
 
@@ -70,7 +72,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static final int COL_WEATHER_WIND_SPEED = 6;
     public static final int COL_WEATHER_PRESSURE = 7;
     public static final int COL_DEGREES = 8;
-    public static final int COL_LOCATION_SETTING = 9;
+    public static final int COL_WEATHER_ICON_ID = 9;
+    public static final int COL_LOCATION_SETTING = 10;
 
     public DetailFragment(){
 
@@ -101,7 +104,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         Intent detailActivityIntent = getActivity().getIntent();
-        date = detailActivityIntent.getStringExtra(Intent.EXTRA_TEXT);
+        if(null != detailActivityIntent && detailActivityIntent.hasExtra(Intent.EXTRA_TEXT)){
+            date = detailActivityIntent.getStringExtra(Intent.EXTRA_TEXT);
+        } else {
+            date = "20140819";
+        }
+
 
         /*
          * Initializes the CursorLoader. The URL_LOADER value is eventually passed
@@ -189,6 +197,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     cursor.getFloat(COL_WEATHER_PRESSURE)
             );
 
+            int weatherArtResourceId = Utility.getArtResourceForWeatherCondition(
+                    cursor.getInt(COL_WEATHER_ICON_ID)
+            );
+
             ((TextView)getActivity().findViewById(R.id.lblDay)).setText(forecastDay);
             ((TextView)getActivity().findViewById(R.id.lblDate)).setText(forecastDate);
             ((TextView)getActivity().findViewById(R.id.lblDesc)).setText(forecastDesc);
@@ -197,6 +209,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             ((TextView)getActivity().findViewById(R.id.lblHumidity)).setText(forecastHumidity);
             ((TextView)getActivity().findViewById(R.id.lblWind)).setText(forecastWind);
             ((TextView)getActivity().findViewById(R.id.lblPressure)).setText(forecastPressure);
+            ((ImageView)getActivity().findViewById(R.id.imgTempArt)).setImageResource(weatherArtResourceId);
 
             forecastData = String.format(
               "%s - %s - %s/%s", forecastDate, forecastDesc, forecastMinTemp, forecastMaxTemp

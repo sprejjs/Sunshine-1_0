@@ -55,10 +55,9 @@
                 android:orientation="vertical"
                 android:layout_height="wrap_content">
 
-                <ImageView android:id="@+id/tempImage"
+                <ImageView android:id="@+id/imgTempArt"
                     android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:src="@drawable/ic_launcher"/>
+                    android:layout_height="100dp"/>
 
                 <TextView android:id="@+id/lblDesc"
                     android:layout_width="wrap_content"
