@@ -22,7 +22,6 @@ import com.spreys.sunshine.app.data.WeatherContract;
 import com.spreys.sunshine.app.data.WeatherContract.LocationEntry;
 import com.spreys.sunshine.app.data.WeatherContract.WeatherEntry;
 
-import org.w3c.dom.Text;
 
 /**
  * Created with Android Studio
@@ -32,12 +31,12 @@ import org.w3c.dom.Text;
  * Contact by: vlad@spreys.com
  */
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
-    private static String date;
     private String forecastData;
     private static final int FORECAST_LOADER = 0;
     private ShareActionProvider mShareActionProvider;
     private String mLocation;
     private static final String LOCATION_KEY = "location";
+    public static final String ARG_DATE = "date";
 
     // For the forecast view we're showing only a small subset of the stored data.
     // Specify the columns we need.
@@ -79,6 +78,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    public String getDate(){
+        if(null != getArguments()){
+            return getArguments().getString(ARG_DATE);
+        }
+        return null;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,15 +108,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-
-        Intent detailActivityIntent = getActivity().getIntent();
-        if(null != detailActivityIntent && detailActivityIntent.hasExtra(Intent.EXTRA_TEXT)){
-            date = detailActivityIntent.getStringExtra(Intent.EXTRA_TEXT);
-        } else {
-            date = "20140819";
-        }
-
-
         /*
          * Initializes the CursorLoader. The URL_LOADER value is eventually passed
          * to onCreateLoader().
@@ -139,6 +136,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         mLocation = Utility.getPreferredLocation(getActivity());
+        String date = getDate();
+
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
                 mLocation, date);
 

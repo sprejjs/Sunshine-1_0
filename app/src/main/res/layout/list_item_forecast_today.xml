@@ -6,7 +6,8 @@
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@drawable/touch_selector">
 
     <LinearLayout
         android:layout_height="wrap_content"
@@ -40,7 +41,6 @@
 
         <ImageView
             android:id="@+id/list_item_icon"
-            android:src="@drawable/ic_launcher"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 

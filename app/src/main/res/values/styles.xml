@@ -5,4 +5,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="ForecastListViewItem">
+
+    </style>
+
+    <style name="ForecastListStyle">
+
+    </style>
+
 </resources>

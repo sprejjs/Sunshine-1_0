@@ -3,16 +3,23 @@ package com.spreys.sunshine.app;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.spreys.sunshine.app.data.WeatherContract;
 
-public class MainActivity extends ActionBarActivity {
+import java.util.Date;
+
+
+public class MainActivity extends ActionBarActivity implements Callback{
     private boolean mTwoPane = false;
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,8 +30,17 @@ public class MainActivity extends ActionBarActivity {
             mTwoPane = true;
 
             if(null == savedInstanceState){
+                String startDate = WeatherContract.getDbDateString(new Date());
+
+                DetailFragment fragment = new DetailFragment();
+
+                Bundle args = new Bundle();
+                args.putString(DetailFragment.ARG_DATE, startDate);
+
+                fragment.setArguments(args);
+
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.weather_detail_container, new DetailFragment())
+                        .replace(R.id.weather_detail_container, fragment)
                         .commit();
             }
         }
@@ -61,5 +77,27 @@ public class MainActivity extends ActionBarActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(String date) {
+        Log.d(LOG_TAG, date);
+
+        if(mTwoPane){
+            DetailFragment fragment = new DetailFragment();
+
+            Bundle args = new Bundle();
+            args.putString(DetailFragment.ARG_DATE, date);
+
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, fragment)
+                    .commit();
+        } else {
+            Intent detailActivityIntent = new Intent(this, DetailActivity.class)
+                    .putExtra(Intent.EXTRA_TEXT, date);
+            startActivity(detailActivityIntent);
+        }
     }
 }
