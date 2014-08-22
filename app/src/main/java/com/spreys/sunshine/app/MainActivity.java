@@ -44,6 +44,11 @@ public class MainActivity extends ActionBarActivity implements Callback{
                         .commit();
             }
         }
+
+        ForecastFragment forecastFragment = (ForecastFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_forecast);
+
+        forecastFragment.setOnePaneLayout(!mTwoPane);
     }
 
 

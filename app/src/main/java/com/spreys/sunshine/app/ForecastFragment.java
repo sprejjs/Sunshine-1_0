@@ -38,6 +38,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private static final String POSITION_KEY = "position";
     private String mLocation;
     private int mPosition;
+    private boolean mOnePaneLayout;
+
+    public void setOnePaneLayout(boolean isOnePaneLayout){
+        this.mOnePaneLayout = isOnePaneLayout;
+        if(null != this.forecastArrayAdapter){
+            this.forecastArrayAdapter.setOnePayLayout(mOnePaneLayout);
+        }
+    }
 
     // For the forecast view we're showing only a small subset of the stored data.
     // Specify the columns we need.
@@ -94,6 +102,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // The SimpleCursorAdapter will take data from the database through the
         // Loader and use it to populate the ListView it's attached to.
         forecastArrayAdapter = new ForecastAdapter(getActivity(),null,0);
+        forecastArrayAdapter.setOnePayLayout(this.mOnePaneLayout);
 
         ListView listView = (ListView)rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(forecastArrayAdapter);
