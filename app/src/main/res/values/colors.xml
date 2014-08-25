@@ -5,4 +5,5 @@
     <color name="sunshine_blue">#ff1ca8f4</color>
     <color name="pink">#ff69b4</color>
     <color name="white">#ffffff</color>
+    <color name="light_font">#646464</color>
 </resources>

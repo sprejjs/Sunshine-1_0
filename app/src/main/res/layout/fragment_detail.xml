@@ -19,10 +19,13 @@
             android:layout_height="wrap_content">
             <TextView android:id="@+id/lblDay"
                 android:layout_width="wrap_content"
-                android:text="Today"
+                android:fontFamily="sans-serif-condensed"
+                android:textAppearance="?android:textAppearanceLarge"
                 android:layout_height="wrap_content" />
 
             <TextView android:id="@+id/lblDate"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/light_font"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
             </LinearLayout>
@@ -30,20 +33,28 @@
         <LinearLayout android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:paddingTop="10dp"
+            android:paddingBottom="20dp"
             android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:orientation="vertical"
+                android:gravity="center"
                 android:layout_height="wrap_content">
 
                     <TextView
                         android:id="@+id/lblHighTemp"
+                        android:textSize="96sp"
+                        android:fontFamily="sans-serif-light"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
                     <TextView android:id="@+id/lblLowTemp"
+                        android:textSize="48sp"
+                        android:fontFamily="sans-serif-light"
+                        android:textColor="@color/light_font"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
@@ -62,6 +73,9 @@
 
                 <TextView android:id="@+id/lblDesc"
                     android:layout_width="wrap_content"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textColor="@color/light_font"
                     android:layout_height="wrap_content" />
 
             </LinearLayout>
@@ -75,14 +89,23 @@
 
             <TextView android:id="@+id/lblHumidity"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView android:id="@+id/lblWind"
-                android:layout_width="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:paddingBottom="4dp"
                 android:layout_height="wrap_content" />
 
             <TextView android:id="@+id/lblPressure"
                 android:layout_width="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:paddingBottom="4dp"
+                android:textAppearance="?android:textAppearanceLarge"
+                android:layout_height="wrap_content" />
+
+            <TextView android:id="@+id/lblWind"
+                android:layout_width="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:paddingBottom="4dp"
+                android:textAppearance="?android:textAppearanceLarge"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
