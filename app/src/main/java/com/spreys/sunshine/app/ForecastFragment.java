@@ -1,17 +1,15 @@
 package com.spreys.sunshine.app;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,14 +18,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import java.util.Date;
 
 import com.spreys.sunshine.app.data.WeatherContract;
 import com.spreys.sunshine.app.data.WeatherContract.LocationEntry;
 import com.spreys.sunshine.app.data.WeatherContract.WeatherEntry;
-import com.spreys.sunshine.app.sync.SunshineSyncAdapter;
+
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created with Android Studio
@@ -66,7 +63,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             WeatherEntry.COLUMN_MAX_TEMP,
             WeatherEntry.COLUMN_MIN_TEMP,
             WeatherEntry.COLUMN_WEATHER_ID,
-            LocationEntry.COLUMN_LOCATION_SETTING
+            LocationEntry.COLUMN_LOCATION_SETTING,
+            LocationEntry.COLUMN_COORD_LAT,
+            LocationEntry.COLUMN_COORD_LONG
     };
 
     // These indices are tied to FORECAST_COLUMNS.  If FORECAST_COLUMNS changes, these
@@ -78,6 +77,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public static final int COL_WEATHER_MIN_TEMP = 4;
     public static final int COL_WEATHER_ICON_ID = 5;
     public static final int COL_LOCATION_SETTING = 6;
+    public static final int COL_LOCATION_LAT = 7;
+    public static final int COL_LOCATION_LONG = 8;
 
     public ForecastFragment() {
     }
@@ -92,31 +93,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putInt(POSITION_KEY, mPosition);
-    }
-
-    /**
-     * Initiates the SunshineService to get the latest data
-     */
-    private void updateWeather(){
-
-//        //Initiate a service
-//        Intent intent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
-//        intent.putExtra(
-//                SunshineService.KEY_LOCATION_QUERY,
-//                Utility.getPreferredLocation(getActivity())
-//        );
-//
-//        //Initiate AlarmManager
-//        AlarmManager alarmMgr = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
-//        PendingIntent alarmIntent = PendingIntent.getBroadcast(
-//                getActivity(),
-//                0,
-//                intent,
-//                PendingIntent.FLAG_ONE_SHOT
-//        );
-//
-//        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, alarmIntent);
-        SunshineSyncAdapter.syncImmediately(getActivity());
     }
 
     @Override
@@ -170,8 +146,17 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
         int id = item.getItemId();
 
-        if(R.id.action_refresh == id){
-            updateWeather();
+        if(R.id.action_show_location_on_map == id){
+            Cursor cursor = forecastArrayAdapter.getCursor();
+
+            float latitude = cursor.getFloat(COL_LOCATION_LAT);
+            float longitude = cursor.getFloat(COL_LOCATION_LONG);
+            String uri = String.format("geo:%f,%f", latitude, longitude);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(uri));
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivity(intent);
+            }
             return true;
         }
 

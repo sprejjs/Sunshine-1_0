@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Location -->
     <EditTextPreference
         android:title="@string/pref_general_location_title"
         android:key="@string/pref_general_location_key"
@@ -9,6 +11,7 @@
         android:singleLine="true"
         />
 
+    <!-- Units -->
     <ListPreference
         android:title="Units"
         android:key="units"
@@ -16,4 +19,13 @@
         android:entryValues="@array/units_values"
         android:defaultValue="@string/pref_general_units_metric_value"
         />
+
+    <!-- Enable notifications -->
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:summary="@string/pref_general_notifications_summary"
+        android:title="@string/pref_general_notifications_title"
+        android:key="@string/pref_general_notifications_key"
+        />
+
 </PreferenceScreen>

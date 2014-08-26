@@ -9,6 +9,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 
+import com.spreys.sunshine.app.Utility;
+
+import java.util.Calendar;
+
 /**
  * Created with Android Studio
  * @author vspreys
@@ -274,11 +278,29 @@ public class WeatherProvider extends ContentProvider{
     }
 
 
+    /**
+     * Deletes data from the data base which is older than 1 day
+     */
+    private void deleteOldData(){
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -1);
+        db.delete(
+                WeatherContract.WeatherEntry.TABLE_NAME,
+                WeatherContract.WeatherEntry.COLUMN_DATETEXT + " <= ?",
+                new String[] {WeatherContract.getDbDateString(calendar.getTime())}
+        );
+    }
+
     @Override
     @SuppressWarnings("NullableProblems")
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sURIMatcher.match(uri);
+
+        //delete old date
+        deleteOldData();
+
         switch (match) {
             case WEATHER:
                 db.beginTransaction();

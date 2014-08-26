@@ -111,34 +111,40 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                         Utility.formatTemperature(context, high, Utility.isMetric(context)),
                         Utility.formatTemperature(context, low, Utility.isMetric(context)));
 
+                boolean notificationsEnabled = prefs.getBoolean(
+                        context.getString(R.string.pref_general_notifications_key),
+                        true
+                );
                 //build your notification here.
-                NotificationCompat.Builder mBuilder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(iconId)
-                                .setContentTitle(context.getString(R.string.app_name))
-                                .setContentText(contentText);
-                // Creates an explicit intent for an Activity in your app
-                Intent resultIntent = new Intent(context, MainActivity.class);
+                if(notificationsEnabled){
+                    NotificationCompat.Builder mBuilder =
+                            new NotificationCompat.Builder(context)
+                                    .setSmallIcon(iconId)
+                                    .setContentTitle(context.getString(R.string.app_name))
+                                    .setContentText(contentText);
+                    // Creates an explicit intent for an Activity in your app
+                    Intent resultIntent = new Intent(context, MainActivity.class);
 
-                // The stack builder object will contain an artificial back stack for the
-                // started Activity.
-                // This ensures that navigating backward from the Activity leads out of
-                // your application to the Home screen.
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-                // Adds the back stack for the Intent (but not the Intent itself)
-                stackBuilder.addParentStack(MainActivity.class);
-                // Adds the Intent that starts the Activity to the top of the stack
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent =
-                        stackBuilder.getPendingIntent(
-                                0,
-                                PendingIntent.FLAG_UPDATE_CURRENT
-                        );
-                mBuilder.setContentIntent(resultPendingIntent);
-                NotificationManager mNotificationManager =
-                        (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-                // mId allows you to update the notification later on.
-                mNotificationManager.notify(WEATHER_NOTIFICATION_ID, mBuilder.build());
+                    // The stack builder object will contain an artificial back stack for the
+                    // started Activity.
+                    // This ensures that navigating backward from the Activity leads out of
+                    // your application to the Home screen.
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                    // Adds the back stack for the Intent (but not the Intent itself)
+                    stackBuilder.addParentStack(MainActivity.class);
+                    // Adds the Intent that starts the Activity to the top of the stack
+                    stackBuilder.addNextIntent(resultIntent);
+                    PendingIntent resultPendingIntent =
+                            stackBuilder.getPendingIntent(
+                                    0,
+                                    PendingIntent.FLAG_UPDATE_CURRENT
+                            );
+                    mBuilder.setContentIntent(resultPendingIntent);
+                    NotificationManager mNotificationManager =
+                            (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    // mId allows you to update the notification later on.
+                    mNotificationManager.notify(WEATHER_NOTIFICATION_ID, mBuilder.build());   
+                }
 
                 //refreshing last sync
                 SharedPreferences.Editor editor = prefs.edit();
