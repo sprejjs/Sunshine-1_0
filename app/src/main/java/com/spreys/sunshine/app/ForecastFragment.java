@@ -1,5 +1,8 @@
 package com.spreys.sunshine.app;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -24,6 +27,7 @@ import java.util.Date;
 import com.spreys.sunshine.app.data.WeatherContract;
 import com.spreys.sunshine.app.data.WeatherContract.LocationEntry;
 import com.spreys.sunshine.app.data.WeatherContract.WeatherEntry;
+import com.spreys.sunshine.app.sync.SunshineSyncAdapter;
 
 /**
  * Created with Android Studio
@@ -90,6 +94,31 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         savedInstanceState.putInt(POSITION_KEY, mPosition);
     }
 
+    /**
+     * Initiates the SunshineService to get the latest data
+     */
+    private void updateWeather(){
+
+//        //Initiate a service
+//        Intent intent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
+//        intent.putExtra(
+//                SunshineService.KEY_LOCATION_QUERY,
+//                Utility.getPreferredLocation(getActivity())
+//        );
+//
+//        //Initiate AlarmManager
+//        AlarmManager alarmMgr = (AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+//        PendingIntent alarmIntent = PendingIntent.getBroadcast(
+//                getActivity(),
+//                0,
+//                intent,
+//                PendingIntent.FLAG_ONE_SHOT
+//        );
+//
+//        alarmMgr.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, alarmIntent);
+        SunshineSyncAdapter.syncImmediately(getActivity());
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -142,8 +171,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         int id = item.getItemId();
 
         if(R.id.action_refresh == id){
-            FetchWeatherTask weatherTask = new FetchWeatherTask(getActivity());
-            weatherTask.execute(Utility.getPreferredLocation(getActivity()));
+            updateWeather();
             return true;
         }
 

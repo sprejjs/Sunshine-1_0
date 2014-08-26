@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.spreys.sunshine.app.data.WeatherContract;
+import com.spreys.sunshine.app.sync.SunshineSyncAdapter;
 
 import java.util.Date;
 
@@ -49,6 +50,7 @@ public class MainActivity extends ActionBarActivity implements Callback{
                 .findFragmentById(R.id.fragment_forecast);
 
         forecastFragment.setOnePaneLayout(!mTwoPane);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
     }
 
 
